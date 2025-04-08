@@ -1,4 +1,3 @@
-// app/login/page.tsx
 'use client';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
@@ -74,6 +73,7 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
         <div className="text-center mt-4 text-sm text-gray-500">
           Don't have an account?{' '}
           <a href="/signup" className="text-[#405DE6] hover:underline">
