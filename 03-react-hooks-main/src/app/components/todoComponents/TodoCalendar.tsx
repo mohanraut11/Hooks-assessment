@@ -1,12 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { Calendar, dateFnsLocalizer, ToolbarProps } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, ToolbarProps as BigCalendarToolbarProps } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useTheme } from '../../context/ThemeContext';
 import { Todo } from './TodoApp';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
+// Define the custom localizer
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -17,6 +18,7 @@ const localizer = dateFnsLocalizer({
   },
 });
 
+// Define the custom event interface
 interface CalendarEvent {
   id: number;
   title: string;
@@ -26,11 +28,14 @@ interface CalendarEvent {
   completed: boolean;
 }
 
+// Define the TodoCalendar props interface
 interface TodoCalendarProps {
   todos: Todo[];
 }
 
-const CustomToolbar = ({ label, onView, views, view, onNavigate }: ToolbarProps) => {
+const CustomToolbar = ({ label, onView, views, view, onNavigate }: BigCalendarToolbarProps<CalendarEvent, object>) => {
+  const viewNames = Object.keys(views);
+
   return (
     <div className="flex justify-between items-center p-2 mb-2">
       <div className="flex items-center gap-2">
@@ -49,7 +54,7 @@ const CustomToolbar = ({ label, onView, views, view, onNavigate }: ToolbarProps)
         </button>
       </div>
       <div className="flex items-center gap-2">
-        {views.map((v) => (
+        {viewNames.map((v) => (
           <button
             key={v}
             className={`px-3 py-1 rounded-md font-medium ${
@@ -57,7 +62,7 @@ const CustomToolbar = ({ label, onView, views, view, onNavigate }: ToolbarProps)
                 ? 'bg-[#1877f2] text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
-            onClick={() => onView(v)}
+            onClick={() => onView(view)}
           >
             {v[0].toUpperCase() + v.slice(1)}
           </button>
@@ -72,6 +77,7 @@ export default function TodoCalendar({ todos }: TodoCalendarProps) {
   const [date, setDate] = useState(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day'>('month'); // Track the view
 
+  // Map todos to CalendarEvent format
   const events: CalendarEvent[] = todos.map((todo) => ({
     id: todo.id,
     title: todo.title,
@@ -125,8 +131,12 @@ export default function TodoCalendar({ todos }: TodoCalendarProps) {
           onNavigate={setDate}  // Handle navigation correctly
           onSelectSlot={({ start }) => handleDateClick(start)}  // Handle date click
           view={view}  // Set view dynamically
-          onView={setView}  // Set view dynamically on toolbar change
-          eventPropGetter={eventStyleGetter}
+          onView={(view) => {
+            if (view === 'month' || view === 'week' || view === 'day') {
+              setView(view);
+            }
+          }}
+                    eventPropGetter={eventStyleGetter}
           components={{
             toolbar: CustomToolbar,
           }}
